@@ -8,5 +8,5 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.js'],
   },
-  base: '/Ci-CD-Learning/actions/'
+  base: '/Ci-CD-Learning/'
 })
