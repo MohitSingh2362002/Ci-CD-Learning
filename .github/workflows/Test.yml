@@ -1,5 +1,13 @@
 name: Test
-on: [push,workflow_dispatch]
+on: 
+  push:
+    branches:
+      - main
+    path-ignore:
+      - ".github/workflows/**"
+      - .gitignore
+      - README.md
+  workflow_dispatch:
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -10,9 +18,36 @@ jobs:
         uses: actions/setup-node@v6 
         with:
           node-version: 20
-      - name: Node version 
-        run: node -v
       - name: Install dependencies
         run: npm ci
       - name: Test
         run: npm test
+  build:
+     needs: test
+     runs-on: ubuntu-latest
+     steps:
+      - name: Clone repository
+        uses: actions/checkout@v6
+      - name: Install Node
+        uses: actions/setup-node@v6 
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm ci
+      -name: Upload artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: build
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: build
+      - name: Deploying to GitHub Pages
+        run: |
+          echo "Deploying to production"
+          echo "Artifact path: ${{ steps.upload.outputs.artifact_path }}"
