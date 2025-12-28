@@ -39,16 +39,20 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v6
         with:
-          name: build
+          name: github-pages
           path: dist
   deploy:
     needs: build
+    permissions:
+      pages: write      
+      id-token: write   
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v6
-        with:
-          name: build
-      - name: Deploying to GitHub Pages
-        run: |
-          echo "Deploying to production"
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        token: ${{ secrets.GITHUB_TOKEN }}
