@@ -41,12 +41,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Build an image from Dockerfile
-        run: docker build -t docker.io/my-organization/my-app:${{ github.sha }} .
-      - name: Run Trivy vulnerability scanner
+      - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@0.33.1
         with:
-          image-ref: 'docker.io/my-organization/my-app:${{ github.sha }}'
+          scan-type: 'fs'
+          scan-ref: '.'
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
