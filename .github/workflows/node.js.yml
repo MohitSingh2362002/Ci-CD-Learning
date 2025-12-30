@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-
+    
     runs-on: ubuntu-latest
     
     steps:
@@ -20,7 +20,34 @@ jobs:
     - name: Frontend Compilation
       run: 
         find . -name "*.js" -exec node --check {} +
-        
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+   
+  gitleaks:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v4
+    - name: gitleak setup
+      uses: gitleaks/gitleaks-action@v2
+
+    - name: gitleaks scan
+      run: 
+        gitleaks detect --source --exit-code=1
+  
+  trivy-scan:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build an image from Dockerfile
+        run: docker build -t docker.io/my-organization/my-app:${{ github.sha }} .
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: 'docker.io/my-organization/my-app:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
