@@ -33,9 +33,10 @@ jobs:
 
     - name: gitleaks scan
       run: 
-        gitleaks detect --source --exit-code=1
+        gitleaks detect --source . --exit-code 1
   
   trivy-scan:
+    needs: gitleaks
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
